@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ryan and Ryan's — Space Study & Arcade Hub</title>
+<style>
+  :root {
+    --bg-deep: #060814;
+    --bg-card: rgba(18, 24, 52, 0.85);
+    --neon-cyan: #00f3ff;
+    --neon-purple: #b537f2;
+    --neon-pink: #ff2a85;
+    --text-main: #e6ecff;
+    --text-muted: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body {
+    background-color: var(--bg-deep);
+    background-image: 
+      radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 4px),
+      radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px),
+      radial-gradient(rgba(181,55,242,0.15), transparent 60%);
+    background-size: 550px 550px, 350px 350px, 100% 100%;
+    background-position: 0 0, 40px 60px, 0 0;
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: rgba(10, 14, 35, 0.95);
+    border-bottom: 2px solid var(--neon-purple);
+    padding: 1rem 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 0 20px rgba(181, 55, 242, 0.4);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+  }
+  nav { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px; }
+  nav button {
+    background: transparent;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+  nav button:hover, nav button.active {
+    background: var(--neon-cyan);
+    color: var(--bg-deep);
+    box-shadow: 0 0 12px var(--neon-cyan);
+  }
+  main { max-width: 1100px; width: 100%; margin: 2rem auto; padding: 0 1.5rem; flex: 1; }
+  .section { display: none; animation: fadeIn 0.4s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .card {
+    background: var(--bg-card);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  h2 { color: var(--neon-cyan); margin-bottom: 1rem; font-size: 1.8rem; }
+  select, button.action-btn, input, textarea {
+    background: #0d132e;
+    color: white;
+    border: 1px solid var(--neon-purple);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  button.action-btn {
+    background: linear-gradient(45deg, var(--neon-purple), var(--neon-pink));
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  button.action-btn:hover { transform: scale(1.03); box-shadow: 0 0 15px var(--neon-pink); }
+
+  /* Flashcards */
+  .flashcard-container { perspective: 1000px; width: 100%; max-width: 500px; height: 260px; margin: 2rem auto; cursor: pointer; }
+  .flashcard {
+    width: 100%; height: 100%; position: relative; transition: transform 0.6s; transform-style: preserve-3d;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center; border-radius: 15px;
+    background: linear-gradient(135deg, #161e42, #0d122b);
+    border: 2px solid var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+    font-size: 1.3rem;
+  }
+  .card-back { transform: rotateY(180deg); border-color: var(--neon-pink); color: #ffd6e7; }
+
+  /* Quiz */
+  .quiz-option {
+    display: block; width: 100%; text-align: left; margin: 10px 0; padding: 12px 18px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--neon-cyan);
+    border-radius: 8px; color: white; cursor: pointer; transition: 0.2s;
+  }
+  .quiz-option:hover { background: rgba(0, 243, 255, 0.2); }
+  .quiz-option.correct { background: #0f5132; border-color: #20c997; }
+  .quiz-option.wrong { background: #842029; border-color: #ea868f; }
+
+  /* Notes */
+  .notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width: 768px) { .notes-grid { grid-template-columns: 1fr; } }
+  textarea { width: 100%; height: 200px; resize: vertical; margin-bottom: 10px; }
+  .saved-note { background: rgba(0,0,0,0.4); border-left: 4px solid var(--neon-cyan); padding: 12px; margin-bottom: 10px; border-radius: 5px; position: relative; }
+  .delete-note { position: absolute; right: 10px; top: 10px; background: #ff2a85; border: none; color: white; padding: 3px 8px; border-radius: 4px; cursor: pointer; }
+
+  /* Arcade 20 Games */
+  .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; }
+  .game-tile {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple);
+    padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s;
+  }
+  .game-tile:hover { transform: translateY(-5px); border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); }
+  #active-game-box { background: #080b1a; border: 2px solid var(--neon-cyan); border-radius: 15px; padding: 20px; margin-bottom: 20px; text-align: center; display: none; }
+  canvas { background: #020308; border: 1px solid var(--neon-purple); border-radius: 8px; max-width: 100%; }
+  .ttt-board { display: grid; grid-template-columns: repeat(3, 80px); gap: 5px; justify-content: center; margin: 15px auto; }
+  .ttt-cell { width: 80px; height: 80px; background: #161e42; border: 1px solid var(--neon-cyan); font-size: 2rem; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .mem-grid { display: grid; grid-template-columns: repeat(4, 65px); gap: 8px; justify-content: center; margin: 15px auto; }
+  .mem-card { width: 65px; height: 65px; background: var(--neon-purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🚀 Ryan and Ryan's</div>
+  <nav>
+    <button class="active" onclick="showTab('home', this)">Home</button>
+    <button onclick="showTab('flashcards', this)">Flashcards</button>
+    <button onclick="showTab('quizzes', this)">9th Grade Quizzes</button>
+    <button onclick="showTab('notes', this)">Space Notes</button>
+    <button onclick="showTab('arcade', this)">20-Game Arcade</button>
+  </nav>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section id="home" class="section active">
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--neon-cyan);">Welcome to Ryan and Ryan's</h1>
+      <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 650px; margin: 0 auto 2rem;">
+        Your mission control for 9th-grade mastery and interstellar arcade breaks. Study English, Science, Math, History, and Agricultural Ed, save your class notes, and unlock 20 space-station games.
+      </p>
+      <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+        <button class="action-btn" onclick="document.querySelectorAll('nav button')[1].click()">Start Flashcards</button>
+        <button class="action-btn" onclick="document.querySelectorAll('nav button')[2].click()">Take a Quiz</button>
+        <button class="action-btn" onclick="document.querySelectorAll('nav button')[4].click()">Play 20 Games</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLASHCARDS -->
+  <section id="flashcards" class="section">
+    <div class="card">
+      <h2>🪐 9th Grade Flashcards</h2>
+      <label>Select Subject: </label>
+      <select id="fc-subject" onchange="loadFlashcards()">
+        <option value="english">9th Grade English</option>
+        <option value="science">9th Grade Science (Biology/Physical)</option>
+        <option value="math">9th Grade Math (Algebra I)</option>
+        <option value="history">9th Grade World History</option>
+        <option value="aged">9th Grade Agricultural Ed</option>
+      </select>
+
+      <div class="flashcard-container" onclick="this.querySelector('.flashcard').classList.toggle('flipped')">
+        <div class="flashcard" id="flashcard-el">
+          <div class="card-face card-front" id="fc-front">Loading...</div>
+          <div class="card-face card-back" id="fc-back">Loading...</div>
+        </div>
+      </div>
+
+      <div style="text-align: center; display: flex; gap: 15px; justify-content: center; align-items: center;">
+        <button class="action-btn" onclick="prevCard()">⬅ Prev</button>
+        <span id="fc-counter">1 / 5</span>
+        <button class="action-btn" onclick="nextCard()">Next ➡</button>
+      </div>
+      <p style="text-align:center; color: var(--text-muted); margin-top: 10px; font-size: 0.9rem;">Click the card to flip between term and definition.</p>
+    </div>
+  </section>
+
+  <!-- QUIZZES -->
+  <section id="quizzes" class="section">
+    <div class="card">
+      <h2>🛰️ 9th Grade Subject Quizzes</h2>
+      <div style="margin-bottom: 1.5rem;">
+        <label>Choose Subject: </label>
+        <select id="quiz-subject" onchange="startQuiz()">
+          <option value="english">9th Grade English</option>
+          <option value="science">9th Grade Science</option>
+          <option value="math">9th Grade Math (Algebra I)</option>
+          <option value="history">9th Grade History</option>
+          <option value="aged">9th Grade Agricultural Ed</option>
+        </select>
+      </div>
+Use code with caution.
+☄️ Mission Log & Class Notes
+
+
+
+
+English
+Science
+Math
+History
+Agricultural Ed
+
+
+Save Note
+
+
+Saved Notes
+
+
+
+👾 Ryan & Ryan's 20-Game Space Arcade
+Select any of the 20 mini-games below to play immediately.
+Game
+Close Game ✖
+
+
+// --- NAVIGATION ---
+function showTab(tabId, btn) {
+document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+document.getElementById(tabId).classList.add('active');
+btn.classList.add('active');
+}
+// --- 9TH GRADE STUDY DATA ---
+const studyData = {
+english: {
+cards: [
+{ q: "Simile vs. Metaphor", a: "A simile compares using 'like' or 'as'; a metaphor compares directly without them." },
+{ q: "Dramatic Irony", a: "When the audience knows a crucial secret that the characters do not (e.g., Romeo & Juliet)." },
+{ q: "Thesis Statement", a: "A single sentence in the introduction that states the main argument of an essay." },
+{ q: "Foreshadowing", a: "Clues or hints dropped by an author about events that will happen later in the story." },
+{ q: "Protagonist vs. Antagonist", a: "The protagonist is the main character; the antagonist is the force opposing them." }
+],
+quiz: [
+{ q: "Which literary device gives human traits to non-human objects?", opts: ["Hyperbole", "Personification", "Alliteration", "Onomatopoeia"], ans: 1 },
+{ q: "In Shakespeare's 'Romeo and Juliet', what is the setting?", opts: ["London", "Venice", "Verona", "Rome"], ans: 2 },
+{ q: "What is the turning point of highest tension in a plot called?", opts: ["Exposition", "Rising Action", "Climax", "Resolution"], ans: 2 }
+]
+},
+science: {
+cards: [
+{ q: "Mitochondria", a: "The powerhouse of the cell; converts glucose into usable ATP energy via cellular respiration." },
+{ q: "Photosynthesis Equation", a: "6CO₂ + 6H₂O + Light Energy → C₆H₁₂O₆ (Glucose) + 6O₂" },
+{ q: "Newton's Second Law", a: "Force equals mass times acceleration (F = ma)." },
+{ q: "Mitosis vs. Meiosis", a: "Mitosis produces 2 identical body cells; Meiosis produces 4 unique sex cells (gametes)." },
+{ q: "Covalent Bond", a: "A chemical bond formed when two atoms share pairs of electrons." }
+],
+quiz: [
+{ q: "Which organelle is responsible for photosynthesis in plant cells?", opts: ["Ribosome", "Chloroplast", "Nucleus", "Vacuole"], ans: 1 },
+{ q: "What is the chemical symbol for Sodium?", opts: ["So", "Sd", "Na", "S"], ans: 2 },
+{ q: "Which macromolecule stores genetic information?", opts: ["Lipids", "Carbohydrates", "Nucleic Acids (DNA)", "Proteins"], ans: 2 }
+]
+},
+math: {
+cards: [
+{ q: "Slope-Intercept Form", a: "y = mx + b, where 'm' is the slope and 'b' is the y-intercept." },
+{ q: "Quadratic Formula", a: "x = (-b ± √(b² - 4ac)) / 2a" },
+{ q: "Slope Formula", a: "m = (y₂ - y₁) / (x₂ - x₁)" },
+{ q: "Difference of Squares", a: "a² - b² = (a + b)(a - b)" },
+{ q: "Domain vs. Range", a: "Domain is all possible input values (x); Range is all possible output values (y)." }
+],
+quiz: [
+{ q: "Solve for x: 3x - 7 = 14", opts: ["x = 5", "x = 7", "x = 21", "x = 3"], ans: 1 },
+{ q: "What is the slope of the line y = -4x + 9?", opts: ["9", "4", "-4", "-9"], ans: 2 },
+{ q: "Simplify: (x³)(x⁴)", opts: ["x¹²", "x⁷", "2x⁷", "x"], ans: 1 }
+]
+},
+history: {
+cards: [
+{ q: "The Renaissance", a: "A period of European cultural, artistic, and scientific 'rebirth' starting in Italy (14th–17th century)." },
+{ q: "Magna Carta (1215)", a: "English charter that limited the power of the king and established rule of law." },
+{ q: "Industrial Revolution", a: "Transition from hand production to machine manufacturing powered by steam and coal." },
+{ q: "Silk Road", a: "Ancient network of trade routes connecting China and the Far East with the Middle East and Europe." },
+{ q: "The Enlightenment", a: "18th-century movement emphasizing reason, individualism, and natural rights (John Locke)." }
+],
+quiz: [
+{ q: "Which invention by Johannes Gutenberg revolutionized communication in Europe?", opts: ["Steam Engine", "Printing Press", "Telegraph", "Compass"], ans: 1 },
+{ q: "Which ancient civilization built Machu Picchu in the Andes Mountains?", opts: ["Aztec", "Maya", "Inca", "Olmec"], ans: 2 },
+{ q: "What document was signed in 1776 declaring American independence?", opts: ["The Constitution", "Bill of Rights", "Declaration of Independence", "Articles of Confederation"], ans: 2 }
+]
+},
+aged: {
+cards: [
+{ q: "FFA Motto", a: "Learning to Do, Doing to Learn, Earning to Live, Living to Serve." },
+{ q: "N-P-K on Fertilizer", a: "Stands for Nitrogen (leaf growth), Phosphorus (roots/flowers), and Potassium (overall plant health)." },
+{ q: "Ruminant Animal", a: "Livestock with a four-compartment stomach (rumen, reticulum, omasum, abomasum) such as cattle and sheep." },
+{ q: "Soil Horizons", a: "Distinct layers of soil: O (Organic), A (Topsoil), B (Subsoil), C (Parent Material), R (Bedrock)." },
+{ q: "SAE in FFA", a: "Supervised Agricultural Experience — hands-on ag projects conducted outside class time." }
+],
+quiz: [
+{ q: "What are the official colors of the National FFA Organization?", opts: ["Green and Gold", "National Blue and Corn Gold", "Red and White", "Navy and Silver"], ans: 1 },
+{ q: "Which soil particle is the largest and drains water fastest?", opts: ["Clay", "Silt", "Sand", "Loam"], ans: 2 },
+{ q: "Which stomach compartment is known as the 'true stomach' in ruminants?", opts: ["Rumen", "Reticulum", "Omasum", "Abomasum"], ans: 3 }
+]
+}
+};
+// --- FLASHCARD LOGIC ---
+let currentCardIdx = 0;
+function loadFlashcards() {
+currentCardIdx = 0;
+renderCard();
+}
+function renderCard() {
+const subj = document.getElementById('fc-subject').value;
+const list = studyData[subj].cards;
+document.getElementById('flashcard-el').classList.remove('flipped');
+document.getElementById('fc-front').innerText = list[currentCardIdx].q;
+document.getElementById('fc-back').innerText = list[currentCardIdx].a;
+document.getElementById('fc-counter').innerText = ${currentCardIdx + 1} / ${list.length};
+}
+function nextCard() {
+const subj = document.getElementById('fc-subject').value;
+currentCardIdx = (currentCardIdx + 1) % studyData[subj].cards.length;
+renderCard();
+}
+function prevCard() {
+const subj = document.getElementById('fc-subject').value;
+const len = studyData[subj].cards.length;
+currentCardIdx = (currentCardIdx - 1 + len) % len;
+renderCard();
+}
+loadFlashcards();
+// --- QUIZ LOGIC ---
+let qIdx = 0, qScore = 0;
+function startQuiz() {
+qIdx = 0; qScore = 0;
+renderQuiz();
+}
+function renderQuiz() {
+const subj = document.getElementById('quiz-subject').value;
+const questions = studyData[subj].quiz;
+const area = document.getElementById('quiz-area');
+if (qIdx >= questions.length) {
+area.innerHTML = <h3>Quiz Complete! 🚀</h3><p style="font-size:1.3rem; margin:15px 0;">Score: <strong>${qScore} / ${questions.length}</strong></p><button class="action-btn" onclick="startQuiz()">Retake Quiz</button>;
+return;
+}
+const q = questions[qIdx];
+let html = <p style="color:var(--neon-purple); font-weight:bold;">Question ${qIdx + 1} of ${questions.length}</p><h3 style="margin:10px 0 15px;">${q.q}</h3>;
+q.opts.forEach((opt, i) => {
+html += <button class="quiz-option" onclick="checkAns(${i}, this)">${opt}</button>;
+});
+area.innerHTML = html;
+}
+function checkAns(choice, btn) {
+const subj = document.getElementById('quiz-subject').value;
+const correct = studyData[subj].quiz[qIdx].ans;
+const btns = document.querySelectorAll('.quiz-option');
+btns.forEach(b => b.disabled = true);
+if (choice === correct) {
+btn.classList.add('correct');
+qScore++;
+} else {
+btn.classList.add('wrong');
+btns[correct].classList.add('correct');
+}
+setTimeout(() => { qIdx++; renderQuiz(); }, 1000);
+}
+startQuiz();
+// --- NOTES LOGIC ---
+function saveNote() {
+const title = document.getElementById('note-title').value.trim();
+const tag = document.getElementById('note-tag').value;
+const body = document.getElementById('note-body').value.trim();
+if (!title || !body) return alert("Please enter both a title and note content.");
+const notes = JSON.parse(localStorage.getItem('rr_notes') || '[]');
+notes.unshift({ id: Date.now(), title, tag, body });
+localStorage.setItem('rr_notes', JSON.stringify(notes));
+document.getElementById('note-title').value = '';
+document.getElementById('note-body').value = '';
+renderNotes();
+}
+function deleteNote(id) {
+let notes = JSON.parse(localStorage.getItem('rr_notes') || '[]');
+notes = notes.filter(n => n.id !== id);
+localStorage.setItem('rr_notes', JSON.stringify(notes));
+renderNotes();
+}
+function renderNotes() {
+const notes = JSON.parse(localStorage.getItem('rr_notes') || '[]');
+const list = document.getElementById('notes-list');
+if (notes.length === 0) { list.innerHTML = "No notes saved yet."; return; }
+list.innerHTML = notes.map(n => <div class="saved-note"> <button class="delete-note" onclick="deleteNote(${n.id})">X</button> <small style="color:var(--neon-cyan);">[${n.tag}]</small> <h4>${n.title}</h4> <p style="margin-top:5px; font-size:0.95rem; white-space:pre-wrap;">${n.body}</p> </div>).join('');
+}
+renderNotes();
+// --- 20 MINI-GAMES ARCADE ---
+let gameLoop = null;
+const gamesList = [
+{ id: 1, name: "1. Asteroid Clicker", icon: "☄️" },
+{ id: 2, name: "2. Space Tic-Tac-Toe", icon: "⭕" },
+{ id: 3, name: "3. Alien Memory Match", icon: "👽" },
+{ id: 4, name: "4. Warp Speed Reaction", icon: "⚡" },
+{ id: 5, name: "5. Guess the Planet Code", icon: "🔢" },
+{ id: 6, name: "6. Rock Paper Laser", icon: "🔫" },
+{ id: 7, name: "7. Star Snake", icon: "🐍" },
+{ id: 8, name: "8. Meteor Dodger", icon: "🚀" },
+{ id: 9, name: "9. Orbital Pong", icon: "🏓" },
+{ id: 10, name: "10. Math Blaster", icon: "➕" },
+{ id: 11, name: "11. Cosmic Coin Flip", icon: "🪙" },
+{ id: 12, name: "12. Galaxy Dice Roll", icon: "🎲" },
+{ id: 13, name: "13. Space Hangman", icon: "🛸" },
+{ id: 14, name: "14. Whac-A-Martian", icon: "👾" },
+{ id: 15, name: "15. Color Nebula", icon: "🎨" },
+{ id: 16, name: "16. Star Typing Speed", icon: "⌨️" },
+{ id: 17, name: "17. Simon Orbit", icon: "🔴" },
+{ id: 18, name: "18. Asteroid Catch", icon: "🧺" },
+{ id: 19, name: "19. Gravity Jump", icon: "🦘" },
+{ id: 20, name: "20. Space Trivia Wheel", icon: "🎡" }
+];
+document.getElementById('games-menu').innerHTML = gamesList.map(g => <div class="game-tile" onclick="launchGame(${g.id}, '${g.name}')"> <div style="font-size:2.2rem; margin-bottom:8px;">${g.icon}</div> <strong>${g.name}</strong> </div>).join('');
+function closeGame() {
+clearInterval(gameLoop);
+document.getElementById('active-game-box').style.display = 'none';
+document.getElementById('game-stage').innerHTML = '';
+}
+function launchGame(id, title) {
+clearInterval(gameLoop);
+const box = document.getElementById('active-game-box');
+const stage = document.getElementById('game-stage');
+document.getElementById('game-title').innerText = title;
+box.style.display = 'block';
+box.scrollIntoView({ behavior: 'smooth' });
+// 1. Asteroid Clicker
+if (id === 1) {
+let score = 0;
+stage.innerHTML = <p>Click the asteroid as fast as you can!</p><h2 id="g1-s">0</h2><button onclick="document.getElementById('g1-s').innerText = ++window.g1c" style="font-size:4rem; background:none; border:none; cursor:pointer;">☄️</button>;
+window.g1c = 0;
+}
+// 2. Tic Tac Toe
+else if (id === 2) {
+let board = Array(9).fill(''), turn = '🚀';
+stage.innerHTML = <p id="ttt-msg">Turn: 🚀</p><div class="ttt-board" id="ttt-b"></div>;
+const renderTTT = () => {
+document.getElementById('ttt-b').innerHTML = board.map((v, i) => <div class="ttt-cell" onclick="playTTT(${i})">${v}</div>).join('');
+};
+window.playTTT = (i) => {
+if (board[i]) return;
+board[i] = turn;
+turn = turn === '🚀' ? '👽' : '🚀';
+document.getElementById('ttt-msg').innerText = Turn: ${turn};
+renderTTT();
+};
+renderTTT();
+}
+// 3. Memory Match
+else if (id === 3) {
+const icons = ['🚀','🚀','👽','👽','🪐','🪐','☄️','☄️'].sort(() => Math.random() - 0.5);
+let flipped = [];
+stage.innerHTML = <div class="mem-grid">${icons.map((ic, i) => ?).join('')}</div>;
+window.flipM = (i, ic) => {
+const el = document.getElementById('mc-' + i);
+if (el.innerText !== '?' || flipped.length === 2) return;
+el.innerText = ic;
+flipped.push({ i, ic, el });
+if (flipped.length === 2) {
+if (flipped[0].ic === flipped[1].ic) { flipped = []; }
+else { setTimeout(() => { flipped.forEach(f => f.el.innerText = '?'); flipped = []; }, 600); }
+}
+};
+}
+// 4. Warp Speed Reaction
+else if (id === 4) {
+stage.innerHTML = <button id="react-btn" class="action-btn" style="padding:30px 50px; font-size:1.3rem;">Wait for Green...</button>;
+const btn = document.getElementById('react-btn');
+btn.style.background = '#842029';
+let start = 0;
+setTimeout(() => {
+if(!document.getElementById('react-btn')) return;
+btn.style.background = '#198754';
+btn.innerText = 'CLICK NOW!';
+start = Date.now();
+}, 1500 + Math.random() * 2000);
+btn.onclick = () => {
+if (!start) btn.innerText = "Too early!";
+else btn.innerText = Reaction Time: ${Date.now() - start} ms!;
+};
+}
+// 5. Guess the Code
+else if (id === 5) {
+const secret = Math.floor(Math.random() * 50) + 1;
+stage.innerHTML = <p>Guess the secret sector number (1–50):</p><input id="g5-in" type="number"> <button class="action-btn" onclick="checkG5()">Guess</button><p id="g5-out" style="margin-top:10px;"></p>;
+window.checkG5 = () => {
+const v = Number(document.getElementById('g5-in').value);
+const out = document.getElementById('g5-out');
+out.innerText = v === secret ? "🎉 Correct! You cracked the code!" : (v < secret ? "Too low! Aim higher." : "Too high! Aim lower.");
+};
+}
+// 6. Rock Paper Laser
+else if (id === 6) {
+stage.innerHTML = <p>Choose your weapon against the Alien AI:</p> <button class="action-btn" onclick="playRPL('Asteroid')">☄️ Asteroid</button> <button class="action-btn" onclick="playRPL('Solar Sail')">🛸 Solar Sail</button> <button class="action-btn" onclick="playRPL('Laser')">🔫 Laser</button> <h3 id="rpl-res" style="margin-top:15px;"></h3>;
+window.playRPL = (p) => {
+const opts = ['Asteroid', 'Solar Sail', 'Laser'];
+const ai = opts[Math.floor(Math.random() * 3)];
+let res = p === ai ? "Tie!" : ((p==='Asteroid'&&ai==='Laser')||(p==='Solar Sail'&&ai==='Asteroid')||(p==='Laser'&&ai==='Solar Sail') ? "You Win!" : "Alien Wins!");
+document.getElementById('rpl-res').innerText = You: ${p} | Alien: ${ai} → ${res};
+};
+}
+// 7. Star Snake
+else if (id === 7) {
+stage.innerHTML = <p>Use Arrow Keys to steer the Star Snake!</p><canvas id="c7" width="300" height="300"></canvas>;
+const ctx = document.getElementById('c7').getContext('2d');
+let snake = [{x:150,y:150}], dx = 15, dy = 0, food = {x:60,y:60};
+document.onkeydown = e => {
+if(e.key==='ArrowUp'&&dy===0){dx=0;dy=-15;}
+if(e.key==='ArrowDown'&&dy===0){dx=0;dy=15;}
+if(e.key==='ArrowLeft'&&dx===0){dx=-15;dy=0;}
+if(e.key==='ArrowRight'&&dx===0){dx=15;dy=0;}
+};
+gameLoop = setInterval(() => {
+const head = {x:(snake[0].x+dx+300)%300, y:(snake[0].y+dy+300)%300};
+snake.unshift(head);
+if(head.x===food.x && head.y===food.y) food={x:Math.floor(Math.random()*20)*15, y:Math.floor(Math.random()*20)*15};
+else snake.pop();
+ctx.fillStyle='#020308'; ctx.fillRect(0,0,300,300);
+ctx.fillStyle='#ff2a85'; ctx.fillRect(food.x,food.y,14,14);
+ctx.fillStyle='#00f3ff'; snake.forEach(s=>ctx.fillRect(s.x,s.y,14,14));
+}, 120);
+}
+// 8. Meteor Dodger
+else if (id === 8) {
+stage.innerHTML = <p>Move mouse left/right over canvas to dodge meteors!</p><canvas id="c8" width="300" height="300"></canvas>;
+const c = document.getElementById('c8'), ctx = c.getContext('2d');
+let px = 140, mx = 100, my = 0, score = 0;
+c.onmousemove = e => { px = e.offsetX - 15; };
+gameLoop = setInterval(() => {
+my += 6;
+if (my > 300) { my = 0; mx = Math.random() * 270; score++; }
+if (my > 250 && mx < px + 30 && mx + 20 > px) { score = 0; my = 0; }
+ctx.fillStyle='#020308'; ctx.fillRect(0,0,300,300);
+ctx.fillStyle='#00f3ff'; ctx.fillRect(px,270,30,15);
+ctx.fillStyle='#ff2a85'; ctx.fillRect(mx,my,20,20);
+ctx.fillStyle='white'; ctx.fillText("Dodged: "+score, 10, 20);
+}, 30);
+}
+// 9. Orbital Pong
+else if (id === 9) {
+stage.innerHTML = <p>Move mouse to control bottom paddle!</p><canvas id="c9" width="300" height="300"></canvas>;
+const c = document.getElementById('c9'), ctx = c.getContext('2d');
+let px = 120, bx = 150, by = 150, vx = 3, vy = 3;
+c.onmousemove = e => { px = e.offsetX - 30; };
+gameLoop = setInterval(() => {
+bx += vx; by += vy;
+if (bx < 0 || bx > 290) vx *= -1;
+if (by < 0) vy *= -1;
+if (by > 275 && bx > px && bx < px + 60) vy *= -1;
+if (by > 300) { bx = 150; by = 100; }
+ctx.fillStyle='#020308'; ctx.fillRect(0,0,300,300);
+ctx.fillStyle='#b537f2'; ctx.fillRect(px,280,60,10);
+ctx.fillStyle='#00f3ff'; ctx.fillRect(bx,by,10,10);
+}, 25);
+}
+// 10. Math Blaster
+else if (id === 10) {
+let a = Math.floor(Math.random()*12)+1, b = Math.floor(Math.random()*12)+1;
+stage.innerHTML = <h3>Solve: ${a} × ${b}</h3><input id="m10" type="number"> <button class="action-btn" onclick="chk10(${a*b})">Fire</button><p id="r10"></p>;
+window.chk10 = (ans) => {
+document.getElementById('r10').innerText = Number(document.getElementById('m10').value) === ans ? "💥 Direct Hit!" : "Missed! Try again.";
+};
+}
+// 11. Cosmic Coin Flip
+else if (id === 11) {
+stage.innerHTML = <button class="action-btn" onclick="document.getElementById('c11').innerText = Math.random()<0.5 ? '🌞 SUNS' : '🌙 MOONS'">Flip Space Coin</button><h2 id="c11" style="margin-top:15px;">?</h2>;
+}
+// 12. Galaxy Dice Roll
+else if (id === 12) {
+stage.innerHTML = <button class="action-btn" onclick="document.getElementById('d12').innerText = 'Rolled: ' + (Math.floor(Math.random()*20)+1)">Roll D20 Space Die</button><h2 id="d12" style="margin-top:15px;">?</h2>;
+}
+// 13. Space Hangman
+else if (id === 13) {
+const word = "NEBULA";
+stage.innerHTML = <p>6-Letter Space Cloud Word: <strong>N _ B _ L _</strong></p><input id="h13" placeholder="Type full word"> <button class="action-btn" onclick="document.getElementById('hr13').innerText = document.getElementById('h13').value.toUpperCase()=== 'NEBULA' ? '🎉 Correct! NEBULA!' : 'Try again!'">Check</button><p id="hr13"></p>;
+}
+// 14. Whac-A-Martian
+else if (id === 14) {
+let pts = 0;
+stage.innerHTML = <h3>Score: <span id="w14">0</span></h3><div style="display:grid;grid-template-columns:repeat(3,70px);gap:10px;justify-content:center;">${[0,1,2,3,4,5].map(i=>🕳️).join('')}</div>;
+let active = 0;
+gameLoop = setInterval(() => {
+document.getElementById('wm'+active).innerText = '🕳️';
+active = Math.floor(Math.random()*6);
+document.getElementById('wm'+active).innerText = '👾';
+}, 700);
+window.hitM = (i) => { if(i===active){ document.getElementById('w14').innerText = ++pts; } };
+}
+// 15. Color Nebula
+else if (id === 15) {
+const colors = ['Cyan', 'Purple', 'Pink'];
+const target = colors[Math.floor(Math.random()*3)];
+stage.innerHTML = <p>Click the <strong>${target}</strong> Star!</p> <button onclick="alert('${target==='Cyan'?'Win!':'Wrong!'}')" style="background:#00f3ff;padding:20px;border:none;border-radius:50%;cursor:pointer;"></button> <button onclick="alert('${target==='Purple'?'Win!':'Wrong!'}')" style="background:#b537f2;padding:20px;border:none;border-radius:50%;cursor:pointer;"></button> <button onclick="alert('${target==='Pink'?'Win!':'Wrong!'}')" style="background:#ff2a85;padding:20px;border:none;border-radius:50%;cursor:pointer;"></button>;
+}
+// 16. Star Typing Speed
+else if (id === 16) {
+const phrase = "To infinity and beyond";
+const t0 = Date.now();
+stage.innerHTML = <p>Type exact phrase: <strong>${phrase}</strong></p><input id="t16" style="width:80%;" onkeyup="if(this.value==='${phrase}') document.getElementById('tr16').innerText='Completed in '+((Date.now()-t0)/1000).toFixed(2)+'s!'"><p id="tr16"></p>;
+}
+// 17. Simon Orbit
+else if (id === 17) {
+const seq =;
+stage.innerHTML = <p>Memorize sequence: <strong>1 - 3 - 2 - 4</strong>, then click in order!</p><div id="s17-msg"></div> + [1,2,3,4].map(n=><button class="action-btn" style="margin:5px;" onclick="sClick(${n})">${n}</button>).join('');
+let idx = 0;
+window.sClick = (n) => {
+if(n === seq[idx]) { idx++; document.getElementById('s17-msg').innerText = idx===4 ? "🎉 Sequence Unlocked!" : Good! (${idx}/4); }
+else { idx = 0; document.getElementById('s17-msg').innerText = "Wrong! Reset to 0."; }
+};
+}
+// 18. Asteroid Catch
+else if (id === 18) {
+let caught = 0;
+stage.innerHTML = <p>Click falling stars before they vanish!</p><h3 id="c18">Caught: 0</h3><button id="star18" onclick="document.getElementById('c18').innerText='Caught: '+(++window.sc18)" style="font-size:2.5rem;background:none;border:none;cursor:pointer;">⭐</button>;
+window.sc18 = 0;
+gameLoop = setInterval(() => {
+const s = document.getElementById('star18');
+if(s) s.style.marginLeft = (Math.random()*200 - 100) + 'px';
+}, 650);
+}
+// 19. Gravity Jump
+else if (id === 19) {
+stage.innerHTML = <p>Press Spacebar or Click Canvas to Jump over craters!</p><canvas id="c19" width="300" height="150"></canvas>;
+const c = document.getElementById('c19'), ctx = c.getContext('2d');
+let py = 110, vy = 0, cx = 300;
+const jump = () => { if(py >= 110) vy = -11; };
+c.onclick = jump;
+gameLoop = setInterval(() => {
+py += vy; vy += 0.8; if(py > 110) { py = 110; vy = 0; }
+cx -= 5; if(cx < -20) cx = 300;
+if(cx < 55 && cx > 25 && py > 95) cx = 300;
+ctx.fillStyle='#020308'; ctx.fillRect(0,0,300,150);
+ctx.fillStyle='#00f3ff'; ctx.fillRect(30,py,25,25);
+ctx.fillStyle='#ff2a85'; ctx.fillRect(cx,115,20,20);
+}, 30);
+}
+// 20. Space Trivia Wheel
+else if (id === 20) {
+const facts = [
+"Venus spins backwards compared to most planets!",
+"One million Earths could fit inside the Sun.",
+"Neutron stars can spin 600 times per second.",
+"Footprints on the Moon will last millions of years."
+];
+stage.innerHTML = <button class="action-btn" onclick="document.getElementById('f20').innerText = facts[Math.floor(Math.random()*facts.length)]">Spin for Space Fact</button><p id="f20" style="margin-top:15px; font-size:1.2rem; color:var(--neon-cyan);"></p>;
+}
+}
