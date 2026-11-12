@@ -1,0 +1,777 @@
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DROPZONE | Game Central</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d19;color:white;font-family:Arial,sans-serif}
+header{background:#101a2d;border-bottom:2px solid #35baff;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:10}
+.logo{font-size:27px;font-weight:1000;color:white}
+.logo span{color:#35baff}
+nav{display:flex;gap:7px;flex-wrap:wrap}
+button{background:#20334f;color:white;border:1px solid #456080;padding:11px 15px;border-radius:9px;cursor:pointer;font-weight:bold}
+button:hover{background:#287dbb}
+button:disabled{opacity:.5;cursor:not-allowed}
+.active{background:#168bd1!important}
+.primary{background:#168bd1;border:0}
+.gold{background:#e5a928;color:#171000;border:0}
+main{max-width:1150px;margin:auto;padding:25px 18px}
+.page{display:none}
+.page.active{display:block}
+.hero{background:linear-gradient(120deg,#12365c,#17213d);border:1px solid #3979a9;border-radius:18px;padding:35px;margin-bottom:25px}
+.hero h1{font-size:clamp(38px,7vw,70px);margin:10px 0}
+.hero p{color:#c4d8ed;line-height:1.6;max-width:650px}
+h2{margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+.card,.panel{background:#121e32;border:1px solid #304663;border-radius:14px;padding:18px}
+.card{display:flex;flex-direction:column;justify-content:space-between;min-height:185px}
+.card h3{margin:8px 0}
+.card p,.muted{color:#a9bad0;line-height:1.5}
+.icon{font-size:38px}
+.tag{color:#5bd5ff;font-size:11px;font-weight:bold;letter-spacing:2px}
+.section-title{margin:30px 0 15px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+input,select,textarea{background:#080f1c;color:white;border:1px solid #456080;border-radius:8px;padding:11px;font-size:15px;max-width:100%}
+input{width:230px}
+textarea{width:100%}
+.game-area{text-align:center;margin-top:18px;min-height:200px}
+.big{font-size:50px;font-weight:1000;color:#5bd5ff;margin:15px}
+.message{color:#ffd45c;font-weight:bold;margin:15px;min-height:22px}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+td,th{text-align:left;padding:11px;border-bottom:1px solid #304663}
+th{color:#5bd5ff}
+.small{font-size:12px;color:#9fb2ca;line-height:1.5}
+.bracket{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px;overflow-x:auto}
+.round{background:#0c1627;border:1px solid #304663;padding:12px;border-radius:10px}
+.match{background:#17243a;border:1px solid #405673;border-radius:9px;padding:10px;margin:10px 0}
+.match select{width:100%;margin-top:6px}
+.score{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #304663;padding:13px 0}
+.owner{color:#ffd45c;font-size:23px;font-weight:bold;margin:12px 0}
+footer{text-align:center;border-top:1px solid #304663;color:#9fb2ca;padding:25px;font-size:12px}
+@media(max-width:650px){header{position:static}.hero{padding:22px}.bracket{grid-template-columns:repeat(4,190px)}}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">DROP<span>ZONE</span> ⚡</div>
+<nav>
+<button class="active" onclick="showPage('home',this)">Home</button>
+<button onclick="showPage('games',this)">Games</button>
+<button onclick="showPage('leaderboard',this)">Leaderboard</button>
+<button onclick="showPage('football',this)">College Football</button>
+<button onclick="showPage('bracket',this)">Playoff Bracket</button>
+<button onclick="showPage('credits',this)">Credits</button>
+</nav>
+</header>
+
+<main>
+
+<!-- HOME -->
+<section id="home" class="page active">
+<div class="hero">
+<div class="tag">WELCOME TO GAME CENTRAL</div>
+<h1>DROP IN.<br><span style="color:#5bd5ff">PLAY BIG.</span></h1>
+<p>Play games, compete for high scores, check out college football, and build your own playoff bracket. Welcome to DropZone.</p>
+<button class="primary" onclick="showPage('games')">PLAY GAMES</button>
+<button class="gold" onclick="showPage('bracket')">BUILD A BRACKET</button>
+</div>
+
+<h2>Featured Games</h2>
+<div class="grid" id="featuredGames"></div>
+
+<div class="section-title"><h2>Your Profile</h2></div>
+<div class="panel">
+<h3 id="homeUsername">Guest</h3>
+<p class="muted">Total games played: <b id="totalGames">0</b></p>
+<p class="muted">Your scores are saved in this browser.</p>
+</div>
+</section>
+
+<!-- GAMES -->
+<section id="games" class="page">
+<h2>🎮 Game Lobby</h2>
+<p class="muted">Choose a game and try to get the highest score!</p>
+<div class="grid" id="gameCards"></div>
+<div class="panel game-area" id="gameArea">
+<h2>Choose a game to start!</h2>
+<p class="muted">Your game will appear here.</p>
+</div>
+</section>
+
+<!-- LEADERBOARD -->
+<section id="leaderboard" class="page">
+<h2>🏆 Leaderboard</h2>
+<div class="panel">
+<h3>Create Your Username</h3>
+<input id="usernameInput" maxlength="18" placeholder="Enter username">
+<button class="primary" onclick="saveUsername()">Save Username</button>
+<p class="small">This version saves scores on this device. For a leaderboard shared by everyone, an online database is needed.</p>
+</div>
+<div class="panel" style="margin-top:15px">
+<h3>Top Scores</h3>
+<div id="leaderboardTable"></div>
+<button class="gold" onclick="clearScores()">Clear My Scores</button>
+</div>
+</section>
+
+<!-- FOOTBALL -->
+<section id="football" class="page">
+<h2>🏈 College Football HQ</h2>
+<div class="panel">
+<button onclick="loadScores()">Scores & Schedule</button>
+<button onclick="loadRankings()">Rankings</button>
+<button onclick="showTeams()">Team Pages</button>
+<div id="footballContent" style="margin-top:20px">
+<p class="muted">Choose a football section above.</p>
+</div>
+<p class="small">Football information is loaded from ESPN's public data service. If the service is unavailable, try again later.</p>
+</div>
+</section>
+
+<!-- BRACKET -->
+<section id="bracket" class="page">
+<h2>🏆 Custom Playoff Bracket</h2>
+<div class="panel">
+<label>Number of teams:</label>
+<select id="bracketSize">
+<option value="4">4 Teams</option>
+<option value="8" selected>8 Teams</option>
+<option value="16">16 Teams</option>
+</select>
+<button class="primary" onclick="createBracket()">Create Bracket</button>
+<button onclick="resetBracket()">Reset Picks</button>
+<p class="small">Choose the winner of each matchup. Winners automatically advance to the next round.</p>
+</div>
+<div id="bracketArea" style="margin-top:20px"></div>
+</section>
+
+<!-- CREDITS -->
+<section id="credits" class="page">
+<div class="hero">
+<div class="tag">THE PEOPLE BEHIND DROPZONE</div>
+<h1>THE CREW.</h1>
+<p>Welcome to DropZone. Built for gaming, football, and competition.</p>
+</div>
+<div class="grid">
+<div class="card"><div class="icon">👑</div><div class="owner">Ryan Schlachter</div><div class="tag">OWNER</div></div>
+<div class="card"><div class="icon">⚡</div><div class="owner">Tyler Stone</div><div class="tag">OWNER</div></div>
+<div class="card"><div class="icon">🎮</div><div class="owner">Ryan Raty</div><div class="tag">OWNER</div></div>
+</div>
+</section>
+
+</main>
+
+<footer>DROPZONE ⚡ | Game hard. Climb the leaderboard.</footer>
+
+<script>
+/* -------------------------
+   WEBSITE NAVIGATION
+-------------------------- */
+
+function showPage(page,button){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(page).classList.add('active');
+ document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+ if(button)button.classList.add('active');
+ if(page==='leaderboard')renderLeaderboard();
+ if(page==='football')loadScores();
+ if(page==='bracket')renderBracket();
+ if(page==='home')updateHome();
+ window.scrollTo(0,0);
+}
+
+/* -------------------------
+   SAVED PLAYER DATA
+-------------------------- */
+
+function getData(){
+ try{
+  return JSON.parse(localStorage.getItem('dropzoneData'))||{username:'Guest',scores:[]};
+ }catch(e){
+  return {username:'Guest',scores:[]};
+ }
+}
+
+function saveData(data){
+ localStorage.setItem('dropzoneData',JSON.stringify(data));
+}
+
+function saveUsername(){
+ let name=document.getElementById('usernameInput').value.trim();
+ if(!name){alert('Enter a username first!');return;}
+ let data=getData();
+ data.username=name;
+ saveData(data);
+ updateHome();
+ renderLeaderboard();
+ alert('Username saved!');
+}
+
+function recordScore(game,score){
+ let data=getData();
+ data.scores.push({
+  username:data.username,
+  game:game,
+  score:Number(score),
+  date:new Date().toLocaleDateString()
+ });
+ saveData(data);
+ renderLeaderboard();
+ updateHome();
+}
+
+function renderLeaderboard(){
+ let data=getData();
+ document.getElementById('usernameInput').value=data.username==='Guest'?'':data.username;
+ let scores=[...data.scores].sort((a,b)=>b.score-a.score);
+ if(scores.length===0){
+  document.getElementById('leaderboardTable').innerHTML='<p class="muted">No scores yet. Play a game!</p>';
+  return;
+ }
+ document.getElementById('leaderboardTable').innerHTML=
+ '<table><tr><th>Rank</th><th>Player</th><th>Game</th><th>Score</th><th>Date</th></tr>'+
+ scores.slice(0,50).map((s,i)=>
+ `<tr><td>#${i+1}</td><td>${safe(s.username)}</td><td>${safe(s.game)}</td><td><b>${s.score}</b></td><td>${safe(s.date)}</td></tr>`
+ ).join('')+'</table>';
+}
+
+function clearScores(){
+ if(!confirm('Delete all your saved scores?'))return;
+ let data=getData();
+ data.scores=[];
+ saveData(data);
+ renderLeaderboard();
+ updateHome();
+}
+
+function updateHome(){
+ let data=getData();
+ document.getElementById('homeUsername').textContent=data.username;
+ document.getElementById('totalGames').textContent=data.scores.length;
+}
+
+function safe(value){
+ return String(value).replace(/[&<>"']/g,c=>({
+ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ })[c]);
+}
+
+/* -------------------------
+   GAME LIBRARY
+-------------------------- */
+
+const games=[
+ {id:'clicker',name:'Rapid Clicker',icon:'🖱️',desc:'Click as many times as possible in 10 seconds.'},
+ {id:'reaction',name:'Reaction Test',icon:'⚡',desc:'Test how fast your reaction time is.'},
+ {id:'guess',name:'Number Guess',icon:'🔢',desc:'Guess the secret number from 1 to 100.'},
+ {id:'math',name:'Math Blitz',icon:'🧠',desc:'Solve math problems before time runs out.'},
+ {id:'memory',name:'Memory Match',icon:'🃏',desc:'Find all the matching cards.'},
+ {id:'quiz',name:'College Football Quiz',icon:'🏈',desc:'Test your college football knowledge.'}
+];
+
+function displayGames(){
+ let html=games.map(g=>`
+ <div class="card">
+  <div>
+   <div class="icon">${g.icon}</div>
+   <h3>${g.name}</h3>
+   <p>${g.desc}</p>
+  </div>
+  <button class="primary" onclick="startGame('${g.id}')">PLAY NOW</button>
+ </div>`).join('');
+ document.getElementById('gameCards').innerHTML=html;
+ document.getElementById('featuredGames').innerHTML=games.slice(0,3).map(g=>`
+ <div class="card">
+  <div><div class="icon">${g.icon}</div><h3>${g.name}</h3><p>${g.desc}</p></div>
+  <button onclick="showPage('games');startGame('${g.id}')">PLAY</button>
+ </div>`).join('');
+}
+
+let timer=null;
+let currentGame='';
+let gameState={};
+
+function stopTimer(){
+ if(timer){clearInterval(timer);timer=null;}
+}
+
+function startGame(id){
+ stopTimer();
+ currentGame=id;
+ gameState={};
+ let area=document.getElementById('gameArea');
+
+ if(id==='clicker'){
+  gameState.score=0;
+  gameState.time=10;
+  area.innerHTML=`
+  <h2>🖱️ Rapid Clicker</h2>
+  <div class="big" id="clickScore">0</div>
+  <p>Time left: <b id="clickTime">10</b> seconds</p>
+  <button class="primary" id="clickButton" onclick="clickGame()">CLICK ME!</button>
+  <div class="message" id="gameMessage">Start clicking!</div>`;
+  timer=setInterval(()=>{
+   gameState.time--;
+   document.getElementById('clickTime').textContent=gameState.time;
+   if(gameState.time<=0){
+    stopTimer();
+    document.getElementById('clickButton').disabled=true;
+    document.getElementById('gameMessage').textContent='Time is up! Score: '+gameState.score;
+    recordScore('Rapid Clicker',gameState.score);
+   }
+  },1000);
+ }
+
+ if(id==='reaction'){
+  gameState.status='ready';
+  area.innerHTML=`
+  <h2>⚡ Reaction Test</h2>
+  <div class="big" id="reactionDisplay">READY?</div>
+  <button class="primary" id="reactionButton" onclick="reactionGame()">START</button>
+  <div class="message" id="gameMessage">Wait for the green signal!</div>`;
+ }
+
+ if(id==='guess'){
+  gameState.target=Math.floor(Math.random()*100)+1;
+  gameState.guesses=0;
+  area.innerHTML=`
+  <h2>🔢 Number Guess</h2>
+  <p>I'm thinking of a number from 1 to 100.</p>
+  <input id="guessInput" type="number" min="1" max="100" placeholder="Your guess">
+  <button class="primary" onclick="guessGame()">GUESS</button>
+  <div class="message" id="gameMessage">Good luck!</div>
+  <p id="guessCount">Guesses: 0</p>`;
+ }
+
+ if(id==='math'){
+  gameState.score=0;
+  gameState.time=30;
+  newMathQuestion();
+  area.innerHTML=`
+  <h2>🧠 Math Blitz</h2>
+  <div class="big" id="mathTime">30</div>
+  <h2 id="mathQuestion"></h2>
+  <input id="mathInput" type="number" placeholder="Your answer">
+  <button class="primary" onclick="mathGame()">SUBMIT</button>
+  <div class="message" id="gameMessage">Score: 0</div>`;
+  timer=setInterval(()=>{
+   gameState.time--;
+   document.getElementById('mathTime').textContent=gameState.time;
+   if(gameState.time<=0){
+    stopTimer();
+    document.getElementById('mathInput').disabled=true;
+    document.getElementById('gameMessage').textContent='Time! Final score: '+gameState.score;
+    recordScore('Math Blitz',gameState.score);
+   }
+  },1000);
+ }
+
+ if(id==='memory'){
+  startMemory();
+ }
+
+ if(id==='quiz'){
+  startQuiz();
+ }
+}
+
+function clickGame(){
+ if(gameState.time<=0)return;
+ gameState.score++;
+ document.getElementById('clickScore').textContent=gameState.score;
+}
+
+/* REACTION TEST */
+
+function reactionGame(){
+ if(gameState.status==='ready'){
+  gameState.status='waiting';
+  document.getElementById('reactionDisplay').textContent='WAIT...';
+  document.getElementById('reactionButton').textContent='WAIT';
+  document.getElementById('reactionButton').style.background='#a12d45';
+  gameState.timeout=setTimeout(()=>{
+   gameState.status='go';
+   gameState.start=performance.now();
+   document.getElementById('reactionDisplay').textContent='CLICK NOW!';
+   document.getElementById('reactionButton').textContent='CLICK!';
+   document.getElementById('reactionButton').style.background='#168b58';
+  },1500+Math.random()*3000);
+ }else if(gameState.status==='waiting'){
+  clearTimeout(gameState.timeout);
+  gameState.status='ready';
+  document.getElementById('reactionDisplay').textContent='TOO EARLY!';
+  document.getElementById('reactionButton').textContent='TRY AGAIN';
+  document.getElementById('reactionButton').style.background='';
+  document.getElementById('gameMessage').textContent='Wait until it turns green!';
+ }else if(gameState.status==='go'){
+  let ms=Math.round(performance.now()-gameState.start);
+  gameState.status='done';
+  document.getElementById('reactionDisplay').textContent=ms+' ms';
+  document.getElementById('reactionButton').textContent='PLAY AGAIN';
+  document.getElementById('reactionButton').style.background='';
+  document.getElementById('gameMessage').textContent='Your reaction time!';
+  recordScore('Reaction Test',Math.max(1,1000-ms));
+ }else{
+  gameState.status='ready';
+  document.getElementById('reactionDisplay').textContent='READY?';
+  document.getElementById('reactionButton').textContent='START';
+  document.getElementById('gameMessage').textContent='Wait for green!';
+ }
+}
+
+/* NUMBER GUESS */
+
+function guessGame(){
+ let n=Number(document.getElementById('guessInput').value);
+ if(!n||n<1||n>100){
+  document.getElementById('gameMessage').textContent='Enter a number from 1 to 100.';
+  return;
+ }
+ gameState.guesses++;
+ document.getElementById('guessCount').textContent='Guesses: '+gameState.guesses;
+ if(n===gameState.target){
+  let score=Math.max(10,110-gameState.guesses*10);
+  document.getElementById('gameMessage').textContent='CORRECT! The number was '+n+'. Score: '+score;
+  recordScore('Number Guess',score);
+  document.getElementById('guessInput').disabled=true;
+ }else if(n<gameState.target){
+  document.getElementById('gameMessage').textContent='Too low! Guess higher.';
+ }else{
+  document.getElementById('gameMessage').textContent='Too high! Guess lower.';
+ }
+}
+
+/* MATH BLITZ */
+
+function newMathQuestion(){
+ let a=Math.floor(Math.random()*12)+1;
+ let b=Math.floor(Math.random()*12)+1;
+ let multiply=Math.random()<0.5;
+ gameState.answer=multiply?a*b:a+b;
+ gameState.question=a+(multiply?' × ':' + ')+b+' = ?';
+}
+
+function mathGame(){
+ if(gameState.time<=0)return;
+ let answer=Number(document.getElementById('mathInput').value);
+ if(document.getElementById('mathInput').value==='')return;
+ if(answer===gameState.answer){
+  gameState.score+=10;
+  document.getElementById('gameMessage').textContent='Correct! Score: '+gameState.score;
+  newMathQuestion();
+  document.getElementById('mathQuestion').textContent=gameState.question;
+ }else{
+  document.getElementById('gameMessage').textContent='Not quite! Try again.';
+ }
+ document.getElementById('mathInput').value='';
+}
+
+/* MEMORY MATCH */
+
+function startMemory(){
+ let cards=['🍕','🚀','🐉','⚽','🌮','👾','🍕','🚀','🐉','⚽','🌮','👾'];
+ cards.sort(()=>Math.random()-0.5);
+ gameState.first=null;
+ gameState.lock=false;
+ gameState.matches=0;
+ let area=document.getElementById('gameArea');
+ area.innerHTML=`
+ <h2>🃏 Memory Match</h2>
+ <p>Find all six matching pairs.</p>
+ <div id="memoryGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;max-width:430px;margin:20px auto">
+ ${cards.map((c,i)=>`<button style="font-size:27px;min-height:65px" data-card="${c}" onclick="flipCard(this)">❔</button>`).join('')}
+ </div>
+ <div class="message" id="gameMessage">Pairs: 0 / 6</div>`;
+}
+
+function flipCard(button){
+ if(gameState.lock||button.disabled||button.dataset.open)return;
+ button.textContent=button.dataset.card;
+ button.dataset.open='yes';
+ if(!gameState.first){
+  gameState.first=button;
+  return;
+ }
+ let first=gameState.first;
+ gameState.first=null;
+ if(first.dataset.card===button.dataset.card){
+  first.disabled=true;
+  button.disabled=true;
+  gameState.matches++;
+  document.getElementById('gameMessage').textContent='Pairs: '+gameState.matches+' / 6';
+  if(gameState.matches===6){
+   document.getElementById('gameMessage').textContent='YOU WON! Score: 100';
+   recordScore('Memory Match',100);
+  }
+ }else{
+  gameState.lock=true;
+  setTimeout(()=>{
+   first.textContent='❔';
+   button.textContent='❔';
+   delete first.dataset.open;
+   delete button.dataset.open;
+   gameState.lock=false;
+  },700);
+ }
+}
+
+/* COLLEGE FOOTBALL QUIZ */
+
+const quizQuestions=[
+ ['How many points is a touchdown worth?',['3','6','7','2'],1],
+ ['How many players from one team are on the field during a normal play?',['9','10','11','12'],2],
+ ['How many points is a safety worth?',['1','2','3','6'],1],
+ ['What is the name of the college football championship game?',['Rose Bowl','Super Bowl','National Championship','Orange Bowl'],2],
+ ['How many points is a field goal worth?',['2','3','6','7'],1],
+ ['What is the name of the trophy awarded to the Heisman winner?',['Heisman Trophy','MVP Cup','Rose Trophy','National Cup'],0],
+ ['How many quarters are in a college football game?',['2','3','4','5'],2],
+ ['How many points is an extra point kick worth?',['1','2','3','6'],0]
+];
+
+function startQuiz(){
+ gameState.quizIndex=0;
+ gameState.quizScore=0;
+ displayQuestion();
+}
+
+function displayQuestion(){
+ let q=quizQuestions[gameState.quizIndex];
+ document.getElementById('gameArea').innerHTML=`
+ <h2>🏈 College Football Quiz</h2>
+ <p>Question ${gameState.quizIndex+1} of ${quizQuestions.length}</p>
+ <h3>${q[0]}</h3>
+ <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
+ ${q[1].map((a,i)=>`<button onclick="answerQuiz(${i})">${a}</button>`).join('')}
+ </div>
+ <div class="message" id="gameMessage">Choose your answer!</div>
+ <p>Score: ${gameState.quizScore}</p>`;
+}
+
+function answerQuiz(answer){
+ let q=quizQuestions[gameState.quizIndex];
+ if(answer===q[2])gameState.quizScore+=10;
+ gameState.quizIndex++;
+ if(gameState.quizIndex>=quizQuestions.length){
+  document.getElementById('gameArea').innerHTML=`
+  <h2>Quiz Complete!</h2>
+  <div class="big">${gameState.quizScore}/${quizQuestions.length*10}</div>
+  <button class="primary" onclick="startGame('quiz')">PLAY AGAIN</button>`;
+  recordScore('College Football Quiz',gameState.quizScore);
+ }else{
+  displayQuestion();
+ }
+}
+
+/* -------------------------
+   COLLEGE FOOTBALL DATA
+-------------------------- */
+
+async function loadScores(){
+ let box=document.getElementById('footballContent');
+ box.innerHTML='<p>Loading scores...</p>';
+ try{
+  let d=new Date();
+  let date=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  let response=await fetch('https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates='+date+'&limit=100');
+  if(!response.ok)throw new Error('Could not load scores');
+  let data=await response.json();
+  let events=data.events||[];
+  if(events.length===0){
+   box.innerHTML='<h3>No games listed today.</h3><p class="muted">Check back on game day!</p>';
+   return;
+  }
+  box.innerHTML=events.map(event=>{
+   let competition=event.competitions?.[0];
+   let teams=competition?.competitors||[];
+   let away=teams.find(t=>t.homeAway==='away')||teams[0];
+   let home=teams.find(t=>t.homeAway==='home')||teams[1];
+   return `<div class="score">
+   <div>
+   <b>${safe(away?.team?.displayName||'Away')}</b> ${away?.score||''}<br>
+   <b>${safe(home?.team?.displayName||'Home')}</b> ${home?.score||''}
+   <p class="small">${safe(event.status?.type?.detail||'Scheduled')}</p>
+   </div>
+   <span class="tag">${event.status?.type?.completed?'FINAL':'GAME'}</span>
+   </div>`;
+  }).join('');
+ }catch(error){
+  box.innerHTML='<h3>Scores could not load.</h3><p class="muted">Try again later or check your internet connection.</p><button onclick="loadScores()">TRY AGAIN</button>';
+ }
+}
+
+async function loadRankings(){
+ let box=document.getElementById('footballContent');
+ box.innerHTML='<p>Loading rankings...</p>';
+ try{
+  let response=await fetch('https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings');
+  if(!response.ok)throw new Error();
+  let data=await response.json();
+  let groups=data.rankings||[];
+  if(!groups.length){
+   box.innerHTML='<p>Rankings are not available right now.</p>';
+   return;
+  }
+  box.innerHTML=groups.map(group=>`
+  <h3>${safe(group.name||'Rankings')}</h3>
+  ${(group.ranks||[]).slice(0,25).map(team=>`
+  <div class="score">
+  <b>#${team.current||team.rank} ${safe(team.team?.name||'Team')}</b>
+  <span>${safe(team.recordSummary||'')}</span>
+  </div>`).join('')}
+  `).join('');
+ }catch(error){
+  box.innerHTML='<p>Rankings could not load. Try again later.</p>';
+ }
+}
+
+function showTeams(){
+ let teams=[
+  ['Oregon','ore'],
+  ['Ohio State','ohio-state'],
+  ['Georgia','geo'],
+  ['Alabama','ala'],
+  ['Texas','tex'],
+  ['Notre Dame','nd'],
+  ['Penn State','psu'],
+  ['Michigan','mic']
+ ];
+ document.getElementById('footballContent').innerHTML=
+ '<h3>Team Pages</h3><p class="muted">Choose a team to see its ESPN page, roster, stats, and schedule.</p>'+
+ '<div class="grid">'+teams.map(t=>`
+ <div class="card">
+ <h3>${t[0]}</h3>
+ <button onclick="window.open('https://www.espn.com/college-football/team/_/name/${t[1]}','_blank')">VIEW TEAM</button>
+ </div>`).join('')+'</div>';
+}
+
+/* -------------------------
+   PLAYOFF BRACKET
+-------------------------- */
+
+const defaultTeams=[
+ 'Oregon','Ohio State','Georgia','Alabama',
+ 'Texas','Notre Dame','Penn State','Clemson',
+ 'Michigan','LSU','Tennessee','Florida State',
+ 'Oklahoma','USC','Utah','Wisconsin'
+];
+
+let bracket={size:8,teams:defaultTeams.slice(0,8),winners:{}};
+
+function saveBracketData(){
+ localStorage.setItem('dropzoneBracket',JSON.stringify(bracket));
+}
+
+function loadBracketData(){
+ try{
+  let saved=JSON.parse(localStorage.getItem('dropzoneBracket'));
+  if(saved&&saved.size&&saved.teams&&saved.winners)bracket=saved;
+ }catch(e){}
+}
+
+function createBracket(){
+ let size=Number(document.getElementById('bracketSize').value);
+ bracket={size:size,teams:defaultTeams.slice(0,size),winners:{}};
+ saveBracketData();
+ renderBracket();
+}
+
+function resetBracket(){
+ bracket.winners={};
+ saveBracketData();
+ renderBracket();
+}
+
+function saveTeams(){
+ let names=document.getElementById('teamNames').value.split('\n').map(x=>x.trim()).filter(Boolean);
+ if(names.length!==bracket.size){
+  alert('Enter exactly '+bracket.size+' team names.');
+  return;
+ }
+ bracket.teams=names;
+ bracket.winners={};
+ saveBracketData();
+ renderBracket();
+}
+
+function setWinner(round,match,value){
+ bracket.winners[round+'-'+match]=value;
+ for(let r=round+1;r<Math.log2(bracket.size);r++){
+  for(let m=0;m<bracket.size/Math.pow(2,r+1);m++){
+   delete bracket.winners[r+'-'+m];
+  }
+ }
+ saveBracketData();
+ renderBracket();
+}
+
+function renderBracket(){
+ let area=document.getElementById('bracketArea');
+ if(!area)return;
+ document.getElementById('bracketSize').value=bracket.size;
+ let rounds=Math.log2(bracket.size);
+ let html='<div class="bracket">';
+ for(let r=0;r<rounds;r++){
+  let matches=bracket.size/Math.pow(2,r+1);
+  let title=r===rounds-1?'CHAMPIONSHIP':r===rounds-2?'SEMIFINALS':r===rounds-3&&rounds>3?'QUARTERFINALS':'ROUND '+(r+1);
+  html+='<div class="round"><h3>'+title+'</h3>';
+  for(let m=0;m<matches;m++){
+   let a,b;
+   if(r===0){
+    a=bracket.teams[m*2]||'';
+    b=bracket.teams[m*2+1]||'';
+   }else{
+    a=bracket.winners[(r-1)+'-'+(m*2)]||'';
+    b=bracket.winners[(r-1)+'-'+(m*2+1)]||'';
+   }
+   let key=r+'-'+m;
+   let selected=bracket.winners[key]||'';
+   html+=`
+   <div class="match">
+   <p class="small">MATCH ${m+1}</p>
+   <select onchange="setWinner(${r},${m},this.value)" ${!a||!b?'disabled':''}>
+   <option value="">Choose winner</option>
+   <option value="${safe(a)}" ${selected===a&&a?'selected':''}>${safe(a||'TBD')}</option>
+   <option value="${safe(b)}" ${selected===b&&b?'selected':''}>${safe(b||'TBD')}</option>
+   </select>
+   </div>`;
+  }
+  html+='</div>';
+ }
+ html+='</div>';
+ let champion=bracket.winners[(rounds-1)+'-0'];
+ if(champion){
+  html+=`<div class="panel" style="text-align:center;margin-top:15px">
+  <div class="tag">YOUR CHAMPION</div>
+  <h1 style="color:#ffd45c">🏆 ${safe(champion)}</h1>
+  </div>`;
+ }
+ html+=`
+ <div class="panel" style="margin-top:15px">
+ <h3>Edit Teams</h3>
+ <p class="small">Enter one team name per line. You need exactly ${bracket.size} teams.</p>
+ <textarea id="teamNames" rows="7">${bracket.teams.map(safe).join('\n')}</textarea>
+ <button class="primary" style="margin-top:10px" onclick="saveTeams()">SAVE TEAMS</button>
+ </div>`;
+ area.innerHTML=html;
+}
+
+/* -------------------------
+   START THE WEBSITE
+-------------------------- */
+
+loadBracketData();
+displayGames();
+updateHome();
+renderLeaderboard();
+renderBracket();
+
+</script>
+
+</body>
+</html>
+```
