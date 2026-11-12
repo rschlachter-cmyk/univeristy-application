@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropZone | Games & College Football</title>
+<style>
+:root{--bg:#080d19;--panel:#121c30;--panel2:#1b2943;--line:#304363;--text:#f5f8ff;--muted:#a9b7ce;--blue:#35a8ff;--cyan:#68e7ff;--gold:#ffd34e;--pink:#ff58a6;--green:#56e5a0}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0%,#1c3d68 0,transparent 34%),linear-gradient(135deg,#080d19,#101b30 58%,#111426);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+header{position:sticky;top:0;z-index:10;background:#080e1deF;backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:13px 5%;gap:14px;flex-wrap:wrap}
+.logo{font-size:25px;font-weight:1000;letter-spacing:1px}.logo span{color:var(--cyan)}nav{display:flex;gap:7px;flex-wrap:wrap}
+button,.tab{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer;transition:.18s}
+button:hover,.tab:hover{border-color:var(--cyan);transform:translateY(-1px)}button.primary{background:linear-gradient(110deg,#1685e8,#22c6e8);border:0;color:#03101e}button.gold{background:linear-gradient(110deg,#ffbd36,#ffe16b);border:0;color:#211500}button.danger{background:#48243a;border-color:#8e3b67}button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+nav button.active{background:var(--blue);color:#061322;border-color:var(--blue)}
+main{max-width:1200px;margin:auto;padding:26px 5% 60px}.hero{padding:35px 28px;border:1px solid #42618a;border-radius:22px;background:linear-gradient(115deg,#142d4cdd,#16203ddd),radial-gradient(circle at 80% 20%,#277ab0,transparent 40%);box-shadow:0 20px 60px #0005;position:relative;overflow:hidden}
+.hero:after{content:"✦";position:absolute;right:7%;top:-32px;font-size:190px;color:#54dfff18;transform:rotate(20deg)}
+.kicker{color:var(--cyan);font-size:12px;font-weight:900;letter-spacing:3px;text-transform:uppercase}.hero h1{font-size:clamp(34px,6vw,64px);margin:10px 0;line-height:1}.hero p{color:#c5d5eb;max-width:620px;line-height:1.6}.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.section{display:none}.section.active{display:block}.section-title{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:28px 0 16px;flex-wrap:wrap}.section-title h2{font-size:27px;margin:0}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+.card{background:linear-gradient(145deg,#17243a,#10192b);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 8px 25px #0002}.game-card{min-height:190px;display:flex;flex-direction:column;justify-content:space-between}.game-icon{font-size:35px}.game-card h3{margin:8px 0 5px}.game-card p{font-size:13px;color:var(--muted);line-height:1.45}.tag{display:inline-block;color:var(--cyan);font-size:10px;letter-spacing:1px;font-weight:900;text-transform:uppercase}
+.panel{background:#0d1627;border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:16px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}input,select{background:#080f1d;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:11px 12px;min-width:0}input:focus,select:focus{outline:2px solid var(--blue)}
+input[type=text]{width:min(100%,280px)}.game-stage{text-align:center;min-height:160px;display:grid;place-items:center}.big-number{font-size:48px;font-weight:1000;color:var(--cyan)}.message{color:var(--gold);font-weight:800;min-height:24px;margin:10px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #283954}th{color:var(--cyan);font-size:11px;letter-spacing:1px;text-transform:uppercase}tr:last-child td{border:0}.rank{color:var(--gold);font-weight:1000}
+.bracket{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:13px;overflow-x:auto}.round h3{color:var(--cyan);font-size:13px;text-transform:uppercase;letter-spacing:1px}.match{background:#101a2c;border:1px solid var(--line);padding:11px;border-radius:11px;margin:9px 0}.match select{width:100%;margin:4px 0;padding:8px}.match small{color:var(--muted)}
+.credits{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}.owner{font-size:22px;font-weight:900;color:var(--gold);margin:8px 0}
+footer{border-top:1px solid var(--line);padding:24px 5%;text-align:center;color:var(--muted);font-size:12px}
+.small{font-size:12px;color:var(--muted);line-height:1.5}.scoreline{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}.scoreline:last-child{border:0}
+@media(max-width:650px){header{position:static}main{padding-top:16px}.hero{padding:25px 20px}.bracket{grid-template-columns:repeat(3,190px)}nav button{padding:8px 10px;font-size:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">DROP<span>ZONE</span> ⚡</div>
+  <nav>
+    <button class="active" data-page="home">Home</button>
+    <button data-page="games">Games</button>
+    <button data-page="leaderboard">Leaderboard</button>
+    <button data-page="football">College Football</button>
+    <button data-page="bracket">Playoff Bracket</button>
+    <button data-page="credits">Credits</button>
+  </nav>
+</header>
+<main>
+<section id="home" class="section active">
+  <div class="hero">
+    <div class="kicker">The DropZone • Game Central</div>
+    <h1>DROP IN.<br><span style="color:var(--cyan)">PLAY BIG.</span></h1>
+    <p>Your hub for quick games, high scores, college football updates, and your own custom playoff tournament. Pick a game and try to take the top spot.</p>
+    <div class="hero-actions"><button class="primary" onclick="showPage('games')">PLAY GAMES</button><button class="gold" onclick="showPage('bracket')">BUILD A BRACKET</button></div>
+  </div>
+  <div class="section-title"><h2>Featured games</h2><span class="muted">Choose your challenge</span></div>
+  <div class="grid" id="featured"></div>
+  <div class="section-title"><h2>Quick stats</h2></div>
+  <div class="grid">
+    <div class="card"><div class="tag">Your gamer tag</div><h2 id="homeUser">Guest</h2><p class="muted">Change your name in the leaderboard tab.</p></div>
+    <div class="card"><div class="tag">Personal bests</div><h2 id="homeScores">0</h2><p class="muted">Saved on this browser.</p></div>
+    <div class="card"><div class="tag">Game library</div><h2>6 games</h2><p class="muted">More challenges can be added to this page.</p></div>
+  </div>
+</section>
+<section id="games" class="section">
+  <div class="section-title"><h2>Game lobby</h2><span class="muted">Play • Score • Climb</span></div>
+  <div class="grid" id="gameList"></div>
+  <div class="panel" id="gamePanel">
+    <div class="tag">Game arena</div><div class="game-stage"><div><h3>Choose a game to start</h3><p class="muted">Your scores will be saved to your leaderboard on this device.</p></div></div>
+  </div>
+</section>
+<section id="leaderboard" class="section">
+  <div class="section-title"><h2>🏆 Leaderboard</h2><span class="muted">Highest scores first</span></div>
+  <div class="panel">
+    <div class="row"><label for="username">Your username</label><input id="username" type="text" maxlength="18" placeholder="Enter gamer tag"><button class="primary" onclick="saveUsername()">Save name</button><button class="danger" onclick="resetScores()">Reset local scores</button></div>
+    <p class="small">Scores are saved in this browser using local storage. This starter version does not sync scores between different people's devices.</p>
+    <div id="leaderboardTable"></div>
+  </div>
+</section>
+<section id="football" class="section">
+  <div class="section-title"><h2>🏈 College Football HQ</h2><span class="muted">Scores • Schedule • Team stats</span></div>
+  <div class="panel">
+    <div class="row"><button class="active" onclick="loadFootball('scoreboard',this)">Scores & schedule</button><button onclick="loadFootball('rankings',this)">Rankings</button><button onclick="loadFootball('teams',this)">Team stats</button></div>
+    <div id="footballContent" style="margin-top:16px"><p class="muted">Loading college football scoreboard…</p></div>
+    <p class="small">Live data is requested from ESPN's public scoreboard endpoint. If it is unavailable, try again later. Stats and rankings availability can vary by season.</p>
+  </div>
+</section>
+<section id="bracket" class="section">
+  <div class="section-title"><h2>🏆 Custom playoff builder</h2><span class="muted">Pick teams and advance winners</span></div>
+  <div class="panel">
+    <div class="row"><label for="bracketSize">Bracket size</label><select id="bracketSize" onchange="buildBracket()"><option value="4">4 teams</option><option value="8" selected>8 teams</option><option value="16">16 teams</option></select><button class="primary" onclick="buildBracket()">Create / reset bracket</button><button onclick="clearBracket()">Clear picks</button></div>
+    <p class="small">Choose a team in each matchup. The selected winner advances to the next round automatically. Add any school names you want.</p>
+    <div id="bracketArea" style="margin-top:18px"></div>
+  </div>
+</section>
+<section id="credits" class="section">
+  <div class="section-title"><h2>⭐ The owners</h2><span class="muted">Built for the squad</span></div>
+  <div class="hero" style="margin-bottom:18px"><div class="kicker">DropZone headquarters</div><h1 style="font-size:42px">THE CREW.</h1><p>Big thanks to the people behind the site. This is your game zone.</p></div>
+  <div class="credits">
+    <div class="card"><div class="game-icon">👑</div><div class="owner">Ryan Schlachter</div><div class="tag">Owner</div></div>
+    <div class="card"><div class="game-icon">⚡</div><div class="owner">Tyler Stone</div><div class="tag">Owner</div></div>
+    <div class="card"><div class="game-icon">🎮</div><div class="owner">Ryan Raty</div><div class="tag">Owner</div></div>
+  </div>
+</section>
+</main>
+<footer>DROPZONE ⚡ • Game hard. Climb the leaderboard. • Not affiliated with Epic Games or the NCAA.</footer>#<script>
+const games=[
+ {id:'clicker',name:'Rapid Clicker',icon:'🖱️',desc:'Click as fast as you can before the timer runs out.',tag:'Speed'},
+ {id:'reaction',name:'Reaction Test',icon:'⚡',desc:'Wait for green, then click as quickly as possible.',tag:'Skill'},
+ {id:'guess',name:'Number Guess',icon:'🔢',desc:'Find the secret number in as few guesses as possible.',tag:'Brain'},
+ {id:'math',name:'Math Blitz',icon:'🧠',desc:'Solve as many quick math problems as you can in 30 seconds.',tag:'Brain'},
+ {id:'memory',name:'Memory Match',icon:'🃏',desc:'Flip cards and find all the matching pairs.',tag:'Memory'},
+ {id:'quiz',name:'College Football Quiz',icon:'🏈',desc:'Answer football trivia questions and earn points.',tag:'Trivia'}
+];
+let currentGame=null,gameTimer=null,clickCount=0,seconds=10,mathScore=0,mathTime=30,mathAnswer=0,guessTarget=0,guessCount=0,memFirst=null,memLock=false,memMatches=0,quizIndex=0,quizScore=0;
+const $=id=>document.getElementById(id);
+function getData(){try{return JSON.parse(localStorage.getItem('dropzoneData'))||{username:'Guest',scores:[]}}catch(e){return{username:'Guest',scores:[]}}}
+function saveData(d){localStorage.setItem('dropzoneData',JSON.stringify(d))}
+function showPage(page){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));$(page).classList.add('active');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));if(page==='leaderboard')renderLeaderboard();if(page==='football')loadFootball('scoreboard');if(page==='bracket')renderBracket();if(page==='home')updateHome();window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+function renderGameCards(){const html=games.map(g=>`<div class="card game-card"><div><div class="game-icon">${g.icon}</div><span class="tag">${g.tag}</span><h3>${g.name}</h3><p>${g.desc}</p></div><button class="primary" onclick="startGame('${g.id}')">PLAY NOW</button></div>`).join('');$('gameList').innerHTML=html;$('featured').innerHTML=games.slice(0,3).map(g=>`<div class="card game-card"><div><div class="game-icon">${g.icon}</div><h3>${g.name}</h3><p>${g.desc}</p></div><button onclick="showPage('games');startGame('${g.id}')">Play game</button></div>`).join('')}
+function arena(html){$('gamePanel').innerHTML=`<div class="tag">Game arena</div>${html}`}
+function stopTimer(){if(gameTimer){clearInterval(gameTimer);gameTimer=null}}
+function startGame(id){stopTimer();currentGame=id;const p=$('gamePanel');
+ if(id==='clicker'){clickCount=0;seconds=10;arena(`<div class="game-stage"><div><h3>Rapid Clicker</h3><div class="big-number" id="clickCount">0</div><p class="muted">Clicks left: <b id="clickTime">10</b>s</p><button class="primary" id="clickBtn" onclick="doClick()">CLICK FAST!</button><div class="message" id="gameMessage">Go!</div></div></div>`);gameTimer=setInterval(()=>{seconds--;$('clickTime').textContent=seconds;if(seconds<=0){stopTimer();$('clickBtn').disabled=true;$('gameMessage').textContent=`Time! You scored ${clickCount} clicks.`;recordScore('Rapid Clicker',clickCount)}},1000)}
+ if(id==='reaction'){arena(`<div class="game-stage"><div><h3>Reaction Test</h3><p id="reactionText" class="big-number">Ready?</p><button id="reactionBtn" class="primary" onclick="reactionClick()">Start test</button><div class="message" id="gameMessage">Click start, wait for green, then click.</div></div></div>`);window.reactionState='idle'}
+ if(id==='guess'){guessTarget=Math.floor(Math.random()*100)+1;guessCount=0;arena(`<div class="game-stage"><div><h3>Number Guess</h3><p class="muted">I'm thinking of a number from 1 to 100.</p><input id="guessInput" type="number" min="1" max="100" placeholder="Your guess"><button class="primary" onclick="makeGuess()">GUESS</button><div class="message" id="gameMessage">Find the number!</div><p id="guessCount" class="muted">Guesses: 0</p></div></div>`)}
+ if(id==='math'){mathScore=0;mathTime=30;newMathQuestion();arena(`<div class="game-stage"><div><h3>Math Blitz</h3><div class="big-number" id="mathClock">30</div><h2 id="mathQuestion"></h2><input id="mathInput" type="number" placeholder="Answer"><button class="primary" onclick="submitMath()">SUBMIT</button><div class="message" id="gameMessage">Score: 0</div></div></div>`);gameTimer=setInterval(()=>{mathTime--;$('mathClock').textContent=mathTime;if(mathTime<=0){stopTimer();$('mathInput').disabled=true;$('gameMessage').textContent=`Time! Final score: ${mathScore}`;recordScore('Math Blitz',mathScore)}},1000);$('mathInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitMath()})}
+ if(id==='memory'){startMemory()}
+ if(id==='quiz'){startQuiz()}
+}
+function doClick(){if(seconds<=0)return;clickCount++;$('clickCount').textContent=clickCount}
+function reactionClick(){if(window.reactionState==='idle'){window.reactionState='waiting';$('reactionBtn').textContent='WAIT…';$('reactionText').textContent='Wait for green';$('reactionBtn').style.background='#a43c56';let delay=1200+Math.random()*3500;window.reactionTimer=setTimeout(()=>{window.reactionState='go';window.reactionStart=performance.now();$('reactionText').textContent='CLICK NOW!';$('reactionBtn').textContent='CLICK!';$('reactionBtn').style.background='#168b58'},delay)}else if(window.reactionState==='waiting'){clearTimeout(window.reactionTimer);window.reactionState='idle';$('gameMessage').textContent='Too early! Press start to try again.';$('reactionText').textContent='False start';$('reactionBtn').textContent='Try again';$('reactionBtn').style.background=''}else if(window.reactionState==='go'){let ms=Math.round(performance.now()-window.reactionStart);window.reactionState='done';$('reactionText').textContent=ms+' ms';$('reactionBtn').textContent='Try again';$('reactionBtn').style.background='';$('gameMessage').textContent='Nice reaction!';recordScore('Reaction Test',Math.max(1,1000-ms))}else{window.reactionState='idle';$('reactionText').textContent='Ready?';$('reactionBtn').textContent='Start test';$('gameMessage').textContent='Wait for green, then click.'}}
+function makeGuess(){let n=Number($('guessInput').value);if(!n||n<1||n>100){$('gameMessage').textContent='Enter a number from 1 to 100.';return}guessCount++;$('guessCount').textContent='Guesses: '+guessCount;if(n===guessTarget){let pts=Math.max(10,110-guessCount*10);$('gameMessage').textContent=`Correct! ${guessTarget} was the number. Score: ${pts}`;recordScore('Number Guess',pts)}else $('gameMessage').textContent=n<guessTarget?'Too low. Try higher!':'Too high. Try lower!'}
+function newMathQuestion(){let a=Math.floor(Math.random()*12)+1,b=Math.floor(Math.random()*12)+1,op=Math.random()<.5?'+':'×';mathAnswer=op==='+'?a+b:a*b;$('mathQuestion').textContent=`${a} ${op} ${b} = ?`}
+function submitMath(){if(!$('mathInput')||$('mathInput').disabled)return;if(Number($('mathInput').value)===mathAnswer){mathScore+=10;$('gameMessage').textContent='Correct! Score: '+mathScore;newMathQuestion()}else $('gameMessage').textContent='Not quite — try again!';$('mathInput').value='';$('mathInput').focus()}
+function startMemory(){let vals=['🍕','🚀','🐉','⚽','🌮','👾','🍕','🚀','🐉','⚽','🌮','👾'].sort(()=>Math.random()-.5);memFirst=null;memLock=false;memMatches=0;arena(`<div><h3>Memory Match</h3><p class="muted">Find all 6 matching pairs.</p><div id="memoryGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;max-width:430px;margin:15px auto">${vals.map((v,i)=>`<button style="font-size:26px;min-height:62px" data-value="${v}" data-index="${i}" onclick="flipMemory(this)">❔</button>`).join('')}</div><div class="message" id="gameMessage">Pairs: 0 / 6</div></div>`)}
+function flipMemory(btn){if(memLock||btn.disabled||btn.dataset.open)return;btn.textContent=btn.dataset.value;btn.dataset.open='1';if(!memFirst){memFirst=btn;return}if(memFirst.dataset.value===btn.dataset.value){memFirst.disabled=true;btn.disabled=true;memFirst=null;memMatches++;$('gameMessage').textContent=`Pairs: ${memMatches} / 6`;if(memMatches===6){$('gameMessage').textContent='You found every pair! Score: 100';recordScore('Memory Match',100)}}else{memLock=true;let first=memFirst;memFirst=null;setTimeout(()=>{first.textContent='❔';btn.textContent='❔';delete first.dataset.open;delete btn.dataset.open;memLock=false},700)}}
+const questions=[['How many points is a touchdown worth?',['3','6','7','2'],1],['What is the name of the championship game for FBS college football?',['Rose Bowl','Super Bowl','College Football Playoff National Championship','Orange Bowl'],2],['How many teams are in the current expanded College Football Playoff format?',['8','10','12','16'],2],['What does a safety score?',['1 point','2 points','3 points','6 points'],1],['How many players from one team are on the field during a normal play?',['9','10','11','12'],2]];
+function startQuiz(){quizIndex=0;quizScore=0;showQuizQuestion()}
+function showQuizQuestion(){let q=questions[quizIndex];arena(`<div><h3>College Football Quiz</h3><p class="muted">Question ${quizIndex+1} of ${questions.length} • Score: ${quizScore}</p><h2>${q[0]}</h2><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">${q[1].map((a,i)=>`<button onclick="answerQuiz(${i})">${a}</button>`).join('')}</div><div class="message" id="gameMessage">Choose your answer.</div></div>`)}
+function answerQuiz(i){let q=questions[quizIndex];if(i===q[2])quizScore+=20;quizIndex++;if(quizIndex>=questions.length){arena(`<div class="game-stage"><div><h3>Quiz complete!</h3><div class="big-number">${quizScore}/100</div><p class="muted">Final score</p><button class="primary" onclick="startGame('quiz')">Play again</button></div></div>`);recordScore('College Football Quiz',quizScore)}else showQuizQuestion()}
+function recordScore(game,score){let d=getData();d.scores.push({game,score:Number(score),date:new Date().toLocaleDateString(),user:d.username||'Guest'});saveData(d);renderLeaderboard();updateHome()}
+function saveUsername(){let d=getData();let n=$('username').value.trim();if(!n){alert('Enter a username first.');return}d.username=n;saveData(d);renderLeaderboard();updateHome()}
+function resetScores(){if(!confirm('Delete all scores saved on this browser?'))return;let d=getData();d.scores=[];saveData(d);renderLeaderboard();updateHome()}
+function renderLeaderboard(){let d=getData();$('username').value=d.username==='Guest'?'':d.username;let scores=[...d.scores].sort((a,b)=>b.score-a.score).slice(0,50);$('leaderboardTable').innerHTML=scores.length?`<table><thead><tr><th>Rank</th><th>Player</th><th>Game</th><th>Score</th><th>Date</th></tr></thead><tbody>${scores.map((s,i)=>`<tr><td class="rank">#${i+1}</td><td>${escapeHtml(s.user)}</td><td>${escapeHtml(s.game)}</td><td><b>${s.score}</b></td><td>${s.date}</td></tr>`).join('')}</tbody></table>`:'<p class="muted">No scores yet. Play a game to get on the board!</p>'}
+function updateHome(){let d=getData();$('homeUser').textContent=d.username;$('homeScores').textContent=d.scores.length}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}// Custom bracket: team selections and winners persist locally.
+const defaultTeams=['Georgia','Ohio State','Oregon','Alabama','Texas','Notre Dame','Penn State','Clemson','Michigan','LSU','Florida State','Tennessee','USC','Utah','Oklahoma','Wisconsin'];
+let bracketState={size:8,teams:defaultTeams.slice(0,8),winners:{}};
+function loadBracket(){try{let b=JSON.parse(localStorage.getItem('dropzoneBracket'));if(b)bracketState=b}catch(e){}}
+function saveBracket(){localStorage.setItem('dropzoneBracket',JSON.stringify(bracketState))}
+function buildBracket(){let size=Number($('bracketSize').value);bracketState={size,teams:defaultTeams.slice(0,size),winners:{}};saveBracket();renderBracket()}
+function clearBracket(){bracketState.winners={};saveBracket();renderBracket()}
+function renderBracket(){if(!$('bracketArea'))return;$('bracketSize').value=bracketState.size;let rounds=Math.log2(bracketState.size),html='<div class="bracket">';let previous=[];
+for(let r=0;r<rounds;r++){let count=bracketState.size/Math.pow(2,r+1);html+=`<div class="round"><h3>${r===rounds-1?'Championship':r===rounds-2?'Semifinals':r===rounds-3&&rounds>3?'Quarterfinals':`Round ${r+1}`}</h3>`;
+for(let m=0;m<count;m++){let key=`${r}-${m}`,a,b;if(r===0){a=bracketState.teams[m*2]||'';b=bracketState.teams[m*2+1]||''}else{a=bracketState.winners[`${r-1}-${m*2}`]||'';b=bracketState.winners[`${r-1}-${m*2+1}`]||''}
+let selected=bracketState.winners[key]||'';html+=`<div class="match"><small>Match ${m+1}</small><select onchange="setWinner('${key}',this.value)" ${!a||!b?'disabled':''}><option value="">Choose winner…</option><option ${selected===a&&a?'selected':''} value="${escapeHtml(a)}">${escapeHtml(a||'TBD')}</option><option ${selected===b&&b?'selected':''} value="${escapeHtml(b)}">${escapeHtml(b||'TBD')}</option></select><small>${a&&b?'Select who advances':'Waiting for previous round'}</small></div>`}
+html+='</div>'}html+='</div>';
+// Team editor lets users enter a custom field of teams.
+html+=`<div class="panel"><h3>Customize your teams</h3><p class="small">Enter ${bracketState.size} team names, one per line. Saving resets the bracket picks.</p><textarea id="teamNames" rows="5" style="width:100%;background:#080f1d;color:white;border:1px solid var(--line);border-radius:9px;padding:10px">${bracketState.teams.join('\n')}</textarea><button class="primary" style="margin-top:10px" onclick="saveTeams()">Save teams</button></div>`;
+let champ=bracketState.winners[`${rounds-1}-0`];if(champ)html+=`<div class="card" style="margin-top:14px;text-align:center"><div class="tag">CHAMPION</div><h2 style="color:var(--gold)">🏆 ${escapeHtml(champ)}</h2></div>`;$('bracketArea').innerHTML=html}
+function setWinner(key,val){bracketState.winners[key]=val;let [r,m]=key.split('-').map(Number);Object.keys(bracketState.winners).forEach(k=>{let [rr,mm]=k.split('-').map(Number);if(rr>r)delete bracketState.winners[k]});saveBracket();renderBracket()}
+function saveTeams(){let teams=$('teamNames').value.split('\n').map(x=>x.trim()).filter(Boolean);if(teams.length!==bracketState.size){alert(`Please enter exactly ${bracketState.size} team names.`);return}bracketState.teams=teams;bracketState.winners={};saveBracket();renderBracket()}
+
+// ESPN public scoreboard endpoint. The app shows the current date by default.
+async function loadFootball(mode,button){if(button){document.querySelectorAll('#football .row button').forEach(b=>b.classList.remove('active'));button.classList.add('active')}let box=$('footballContent');box.innerHTML='<p class="muted">Loading…</p>';
+try{if(mode==='scoreboard'){let date=new Date();let dateStr=date.getFullYear()+String(date.getMonth()+1).padStart(2,'0')+String(date.getDate()).padStart(2,'0');let res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=${dateStr}&limit=100`);if(!res.ok)throw Error('Scoreboard unavailable');let data=await res.json();let events=data.events||[];if(!events.length){box.innerHTML='<p>No games listed for today. Try again on a game day.</p>';return}box.innerHTML=events.map(ev=>{let comp=ev.competitions?.[0],c=comp?.competitors||[],home=c.find(x=>x.homeAway==='home')||c[0],away=c.find(x=>x.homeAway==='away')||c[1];return `<div class="scoreline"><div><b>${escapeHtml(away?.team?.displayName||'TBD')}</b> <span class="muted">${away?.score??''}</span><br><b>${escapeHtml(home?.team?.displayName||'TBD')}</b> <span class="muted">${home?.score??''}</span><p class="small">${escapeHtml(ev.name||'College football')} • ${escapeHtml(ev.status?.type?.detail||'Scheduled')}</p></div><span class="tag">${ev.status?.type?.completed?'FINAL':'GAME'}</span></div>`}).join('')}
+else if(mode==='rankings'){let res=await fetch('https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings');if(!res.ok)throw Error('Rankings unavailable');let d=await res.json();let groups=d.rankings||[];box.innerHTML=groups.length?groups.map(g=>`<h3>${escapeHtml(g.name||'Rankings')}</h3>`+(g.ranks||[]).slice(0,25).map(t=>`<div class="scoreline"><b>#${t.current||t.rank} ${escapeHtml(t.team?.name||'Team')}</b><span>${escapeHtml(t.recordSummary||'')}</span></div>`).join('')).join(''):'Rankings are not available from this feed right now.'}
+else{box.innerHTML='<h3>Team stats</h3><p>For team-level season stats, use ESPN team pages. Choose a team below to open its current profile.</p><div class="row"><select id="teamLink"><option value="oregon">Oregon</option><option value="georgia">Georgia</option><option value="ohio-state">Ohio State</option><option value="texas">Texas</option><option value="alabama">Alabama</option><option value="notre-dame">Notre Dame</option></select><button class="primary" onclick="openTeam()">View team stats ↗</button></div><p class="small">Team stats and player leaders can be found on each team's ESPN profile.</p>'}
+}catch(e){box.innerHTML=`<p>Couldn't load live data right now. Check your connection or try again later.</p><p class="small">${escapeHtml(e.message)}</p>`}}
+function openTeam(){let t=$('teamLink').value;window.open(`https://www.espn.com/college-football/team/_/name/${t}`,'_blank')}
+loadBracket();renderGameCards();updateHome();renderLeaderboard();renderBracket();
+</script>
+</body>
+</html>
