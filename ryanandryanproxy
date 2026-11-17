@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ryan's Proxy</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background: #101827;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 700px;
+  text-align: center;
+}
+
+.logo {
+  font-size: 42px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.logo span {
+  color: #806cff;
+}
+
+.subtitle {
+  color: #aab8d0;
+  margin-bottom: 35px;
+}
+
+.search {
+  display: flex;
+  background: #243249;
+  padding: 8px;
+  border-radius: 40px;
+  border: 1px solid #45536b;
+  gap: 8px;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+}
+
+.search button {
+  border: none;
+  background: #7562f6;
+  color: white;
+  padding: 12px 22px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.search button:hover {
+  background: #9384ff;
+}
+
+select {
+  margin-top: 18px;
+  background: #243249;
+  color: white;
+  border: 1px solid #45536b;
+  border-radius: 20px;
+  padding: 10px 18px;
+}
+
+.shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 35px;
+}
+
+.shortcut {
+  display: block;
+  background: #202e44;
+  padding: 25px 10px;
+  border-radius: 15px;
+  color: white;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.shortcut:hover {
+  background: #354765;
+  transform: translateY(-3px);
+}
+
+.shortcut .emoji {
+  font-size: 30px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+footer {
+  color: #71819b;
+  margin-top: 45px;
+  font-size: 12px;
+}
+
+@media(max-width: 450px) {
+  .logo { font-size: 32px; }
+  .shortcuts { gap: 8px; }
+  .shortcut { padding: 18px 5px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="logo">
+    🌐 Ryan's <span>Proxy</span>
+  </div>
+
+  <div class="subtitle">
+    Your personal web search homepage
+  </div>
+
+  <form class="search" id="searchForm">
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Search anything..."
+      autocomplete="off"
+      required
+    >
+    <button type="submit">Search</button>
+  </form>
+
+  <select id="engine">
+    <option value="https://www.google.com/search?q=">
+      Google
+    </option>
+    <option value="https://duckduckgo.com/?q=">
+      DuckDuckGo
+    </option>
+    <option value="https://www.bing.com/search?q=">
+      Bing
+    </option>
+  </select>
+
+  <div class="shortcuts">
+
+    <a class="shortcut"
+       href="https://www.youtube.com"
+       target="_blank" rel="noopener">
+      <span class="emoji">▶️</span>
+      YouTube
+    </a>
+
+    <a class="shortcut"
+       href="https://www.wikipedia.org"
+       target="_blank" rel="noopener">
+      <span class="emoji">📚</span>
+      Wikipedia
+    </a>
+
+    <a class="shortcut"
+       href="https://www.google.com"
+       target="_blank" rel="noopener">
+      <span class="emoji">🔎</span>
+      Google
+    </a>
+
+    <a class="shortcut"
+       href="https://www.twitch.tv"
+       target="_blank" rel="noopener">
+      <span class="emoji">🎮</span>
+      Twitch
+    </a>
+
+    <a class="shortcut"
+       href="https://www.reddit.com"
+       target="_blank" rel="noopener">
+      <span class="emoji">💬</span>
+      Reddit
+    </a>
+
+    <a class="shortcut"
+       href="https://www.github.com"
+       target="_blank" rel="noopener">
+      <span class="emoji">💻</span>
+      GitHub
+    </a>
+
+  </div>
+
+  <footer>
+    RYAN'S PROXY • PERSONAL WEB HOMEPAGE
+  </footer>
+
+</div>
+
+<script>
+const form = document.getElementById("searchForm");
+const input = document.getElementById("searchInput");
+const engine = document.getElementById("engine");
+
+form.addEventListener("submit", function(event) {
+  event.preventDefault();
+
+  const query = input.value.trim();
+
+  if (!query) return;
+
+  const url = engine.value + encodeURIComponent(query);
+
+  window.open(url, "_blank", "noopener");
+});
+</script>
+
+</body>
+</html>
